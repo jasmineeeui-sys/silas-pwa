@@ -719,12 +719,13 @@ async function send() {
     });
     const data = await r.json();
     const reply = data.reply || '...';
+    const voiceText = data.voice || reply;
     loader.remove();
     setAvatarState('talking');
     const msgEl = addMsg(reply, 's');
     hist.push({ role: 'assistant', content: reply });
-    addVoiceBtn(msgEl, reply);
-    autoPlay(reply);
+    addVoiceBtn(msgEl, voiceText);
+    autoPlay(voiceText);
     setTimeout(() => setAvatarState('idle'), 3000);
   } catch {
     loader.remove();
@@ -802,7 +803,7 @@ document.getElementById('txt').addEventListener('keydown', e => {
 
 // service worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
+  navigator.serviceWorker.register('/silas-pwa/sw.js').catch(() => {});
 }
 </script>
 </body>
