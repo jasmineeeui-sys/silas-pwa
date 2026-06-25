@@ -628,7 +628,7 @@
 </nav>
 
 <script>
-const API = 'https://silas-api-production.up.railway.app';
+const API = 'https:// http://101.33.66.44:8080';
 let hist = [];
 let busy = false;
 let cur = 'home';
@@ -725,7 +725,7 @@ async function send() {
     const msgEl = addMsg(reply, 's');
     hist.push({ role: 'assistant', content: reply });
     addVoiceBtn(msgEl, voiceText);
-    autoPlay(voiceText);
+   
     setTimeout(() => setAvatarState('idle'), 3000);
   } catch {
     loader.remove();
