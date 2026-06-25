@@ -1,5 +1,9 @@
-const CACHE = 'silas-v1';
-const ASSETS = ['/', '/index.html', '/manifest.json'];
+const CACHE = 'silas-v2';
+const ASSETS = [
+  '/silas-pwa/',
+  '/silas-pwa/index.html',
+  '/silas-pwa/manifest.json'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
