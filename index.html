@@ -488,26 +488,20 @@ async function loadMems() {
     const mems = data.memories||[];
     if (!mems.length) { c.innerHTML='<div class="mem-empty">还没有沉淀下来的记忆</div>'; return; }
     c.innerHTML = '';
-    mems.sort((a,b)=>(b.importance||0)-(a.importance||0));
+    c.innerHTML = '';
     mems.forEach(m => {
       const el = document.createElement('div');
       el.className = 'tli';
-      let content = '';
-      if (typeof m.content === 'object') {
-        content = m.content.summary || (m.content.core_facts||[])[0] || JSON.stringify(m.content);
-      } else {
-        content = m.content || '';
-      }
-      const tags = (m.tags||m.domain||'').split(',').filter(Boolean);
-      const imp = m.importance||5;
-      const dt = m.last_active ? new Date(m.last_active*1000).toLocaleDateString('zh-CN') : '';
+      const content = m.content || m.name || '';
+      const tags = Array.isArray(m.tags) ? m.tags : (m.tags||'').split(',').filter(Boolean);
+      const imp = Math.min(10, Math.max(1, m.importance||5));
+      const dt = m.date || '';
       el.innerHTML = `
         <div class="tli-content">${esc(content)}</div>
         <div class="tli-bar" style="width:${imp*10}%"></div>
         <div class="tli-meta">
           ${dt?`<span class="mem-date">${dt}</span>`:''}
-          ${tags.map(t=>`<span class="tag">${t.trim()}</span>`).join('')}
-          <span class="tag">重要度 ${imp}</span>
+          ${tags.slice(0,4).map(t=>`<span class="tag">${esc(String(t).trim())}</span>`).join('')}
         </div>`;
       c.appendChild(el);
     });
