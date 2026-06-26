@@ -669,7 +669,7 @@ async function sendMsg(){
     loader.remove();
     const reply=data.reply||'...';
     hist.push({role:'assistant',content:reply});
-    if(data.voice_text){ addVoiceBubble(data.voice_text, data.voice_translation||reply) }
+    if(data.voice){ addVoiceBubble(data.voice, reply) }
     else { addTextBubble(reply,'s') }
     if(data.memory_candidates) data.memory_candidates.forEach(m=>queueMemory(m));
   }catch{ loader.remove(); addTextBubble('连接不上，稍后再试。','s') }
