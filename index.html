@@ -1,810 +1,573 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Silas & Jasmine</title>
-  <meta name="theme-color" content="#FDF0F2">
+  <meta name="theme-color" content="#F9F4E8">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Silas">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500&family=Playfair+Display:ital,wght@0,400;1,400&display=swap">
   <style>
     :root {
-      --bg: #FDF0F2;
-      --surface: rgba(255, 246, 249, 0.82);
-      --border: rgba(210, 170, 180, 0.28);
-      --rose: #C8697A;
-      --rose-soft: #E8A0AD;
-      --rose-pale: #F9DDE3;
-      --silas: #5C3545;
-      --text: #3A2530;
-      --text-2: #7A5565;
-      --text-3: #AA8898;
-      --nav-h: 72px;
-      --header-h: 54px;
-      --tabs-h: 42px;
-      --input-h: 68px;
-      --r: 18px;
-      --r-sm: 12px;
+      --bg: #F9F4E8; --surface: rgba(255,248,220,0.85); --surface-s: #FFF8DC;
+      --border: rgba(210,190,140,0.28); --accent: #B89A5A; --accent-s: rgba(184,154,90,0.15);
+      --text: #5C4A2A; --text2: #8B7355; --text3: #B8A880;
+      --user-bg: rgba(184,154,90,0.16); --silas-bg: rgba(255,248,220,0.94);
+      --nav: rgba(249,244,232,0.94); --shadow: rgba(92,74,42,0.08); --clothes: #B89A5A;
+    }
+    .th-lavender {
+      --bg: #F2EEF8; --surface: rgba(232,225,248,0.85); --surface-s: #E8E1F8;
+      --border: rgba(165,140,215,0.28); --accent: #9478C8; --accent-s: rgba(148,120,200,0.15);
+      --text: #4A3878; --text2: #7B6BA8; --text3: #A898D8;
+      --user-bg: rgba(148,120,200,0.16); --silas-bg: rgba(232,225,248,0.94);
+      --nav: rgba(242,238,248,0.94); --shadow: rgba(74,56,120,0.08); --clothes: #9478C8;
+    }
+    .th-sage {
+      --bg: #EEF2EE; --surface: rgba(218,235,216,0.85); --surface-s: #DAE8D8;
+      --border: rgba(140,185,138,0.28); --accent: #6A9868; --accent-s: rgba(106,152,104,0.15);
+      --text: #2A4A2A; --text2: #5A7A58; --text3: #88A888;
+      --user-bg: rgba(106,152,104,0.16); --silas-bg: rgba(218,235,216,0.94);
+      --nav: rgba(238,242,238,0.94); --shadow: rgba(42,74,42,0.08); --clothes: #6A9868;
+    }
+    .th-lotus {
+      --bg: #F8F0F2; --surface: rgba(240,220,228,0.85); --surface-s: #F0DCE4;
+      --border: rgba(195,155,170,0.28); --accent: #C07888; --accent-s: rgba(192,120,136,0.15);
+      --text: #5A2A38; --text2: #8A5A68; --text3: #B88898;
+      --user-bg: rgba(192,120,136,0.16); --silas-bg: rgba(240,220,228,0.94);
+      --nav: rgba(248,240,242,0.94); --shadow: rgba(90,42,56,0.08); --clothes: #C07888;
+    }
+    .th-smoke {
+      --bg: #EEF0F5; --surface: rgba(218,225,240,0.85); --surface-s: #DAE1F0;
+      --border: rgba(140,165,205,0.28); --accent: #5880B0; --accent-s: rgba(88,128,176,0.15);
+      --text: #1A3858; --text2: #486888; --text3: #7898B8;
+      --user-bg: rgba(88,128,176,0.16); --silas-bg: rgba(218,225,240,0.94);
+      --nav: rgba(238,240,245,0.94); --shadow: rgba(26,56,88,0.08); --clothes: #5880B0;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+    html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Noto Serif SC',Georgia,serif;font-size:15px;transition:background .35s,color .35s}
+    #app{display:flex;flex-direction:column;height:100%;height:-webkit-fill-available;max-width:480px;margin:0 auto;position:relative}
 
-    html { height: 100%; }
+    /* HEADER */
+    .hdr{display:flex;align-items:center;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));background:var(--nav);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);gap:9px;position:sticky;top:0;z-index:100}
+    .hdr-av{width:26px;height:34px;flex-shrink:0;image-rendering:pixelated}
+    .hdr-info{flex:1}
+    .hdr-title{font-family:'Playfair Display',serif;font-size:15px;color:var(--text)}
+    .hdr-sub{font-size:10px;color:var(--text3);margin-top:1px}
+    .status-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 2.5s infinite;flex-shrink:0}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
 
-    body {
-      font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      height: 100%;
-      overflow: hidden;
-      position: relative;
-    }
+    /* PAGES */
+    .pages{flex:1;overflow:hidden;position:relative}
+    .page{position:absolute;inset:0;overflow-y:auto;display:none;-webkit-overflow-scrolling:touch}
+    .page.active{display:block}
+    #page-chat{display:none;flex-direction:column;overflow:hidden}
+    #page-chat.active{display:flex}
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 70% 50% at 20% 10%, rgba(232, 160, 173, 0.18) 0%, transparent 55%),
-        radial-gradient(ellipse 50% 40% at 85% 75%, rgba(200, 105, 122, 0.10) 0%, transparent 50%);
-      pointer-events: none;
-      z-index: 0;
-    }
+    /* BOTTOM NAV */
+    .bnav{display:flex;background:var(--nav);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
+    .ni{flex:1;padding:9px 4px 5px;text-align:center;cursor:pointer;color:var(--text3);transition:color .2s;user-select:none}
+    .ni.active{color:var(--accent)}
+    .ni-icon{font-size:19px;display:block}
+    .ni-lbl{font-size:10px;margin-top:1px;display:block}
 
-    /* ── HEADER ── */
-    header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      height: var(--header-h);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 18px;
-      background: rgba(253, 240, 242, 0.88);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-bottom: 1px solid var(--border);
-      z-index: 200;
-    }
+    /* CHAT */
+    .chat-msgs{flex:1;padding:14px 11px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
+    .mg{display:flex;flex-direction:column;gap:3px}
+    .mg.user{align-items:flex-end}
+    .mg.silas{align-items:flex-start}
+    .bubble{max-width:80%;padding:9px 13px;border-radius:17px;line-height:1.55;font-size:14px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);word-break:break-word}
+    .mg.user .bubble{background:var(--user-bg);border:1px solid var(--border);border-radius:17px 17px 4px 17px}
+    .mg.silas .bubble{background:var(--silas-bg);border:1px solid var(--border);border-radius:17px 17px 17px 4px;box-shadow:0 2px 8px var(--shadow)}
+    .msg-meta{display:flex;align-items:center;gap:7px;padding:0 3px}
+    .ts{font-size:10px;color:var(--text3)}
+    .vbtn{background:var(--accent-s);border:1px solid var(--border);border-radius:9px;padding:2px 8px;font-size:11px;color:var(--accent);cursor:pointer;transition:background .2s;font-family:'Noto Serif SC',serif}
+    .vbtn:hover{background:var(--user-bg)}
+    .thinking{max-width:80%;margin-bottom:2px}
+    .thinking summary{font-size:11px;color:var(--text3);cursor:pointer;user-select:none;padding:3px 9px;border-radius:8px;background:var(--accent-s);display:inline-flex;align-items:center;gap:4px;list-style:none}
+    .thinking summary::-webkit-details-marker{display:none}
+    .thinking-body{margin-top:5px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:11px;font-size:12px;color:var(--text2);line-height:1.5;backdrop-filter:blur(12px);white-space:pre-wrap}
+    .ldots{background:var(--silas-bg);border:1px solid var(--border);border-radius:17px 17px 17px 4px;padding:11px 15px;display:inline-flex;gap:5px;align-items:center;box-shadow:0 2px 8px var(--shadow)}
+    .ld{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:bop 1.2s infinite}
+    .ld:nth-child(2){animation-delay:.2s}.ld:nth-child(3){animation-delay:.4s}
+    @keyframes bop{0%,100%{transform:translateY(0);opacity:.35}50%{transform:translateY(-5px);opacity:1}}
+    .date-div{text-align:center;font-size:10px;color:var(--text3);display:flex;align-items:center;gap:8px;padding:2px 0}
+    .date-div::before,.date-div::after{content:'';flex:1;height:1px;background:var(--border)}
+    .cin{padding:9px 11px;padding-bottom:max(9px,env(safe-area-inset-bottom));background:var(--nav);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end}
+    .ctxt{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:17px;padding:8px 13px;font-size:14px;font-family:'Noto Serif SC',serif;color:var(--text);resize:none;outline:none;min-height:36px;max-height:96px;line-height:1.45;backdrop-filter:blur(12px)}
+    .ctxt::placeholder{color:var(--text3)}
+    .sbtn{width:36px;height:36px;border-radius:50%;background:var(--accent);border:none;color:#fff;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s}
+    .sbtn:disabled{opacity:.38}
 
-    .brand {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 16px;
-      color: var(--silas);
-      letter-spacing: 0.02em;
-    }
+    /* MEMORY */
+    #page-memory{padding:15px 12px}
+    .ptitle{font-family:'Playfair Display',serif;font-size:17px;color:var(--text);margin-bottom:14px}
+    .tl{position:relative;padding-left:18px}
+    .tl::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:1px;background:var(--border)}
+    .tli{position:relative;margin-bottom:14px;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:11px 13px;backdrop-filter:blur(12px)}
+    .tli::before{content:'';position:absolute;left:-15px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
+    .tli-content{font-size:13px;line-height:1.55;color:var(--text)}
+    .tli-bar{height:3px;border-radius:2px;background:var(--accent);margin-top:7px;opacity:.7}
+    .tli-meta{margin-top:7px;display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+    .tag{background:var(--accent-s);border:1px solid var(--border);border-radius:7px;padding:1px 7px;font-size:10px;color:var(--text2)}
+    .mem-date{font-size:10px;color:var(--text3)}
+    .mem-empty{text-align:center;color:var(--text3);font-size:13px;padding:36px 20px;font-style:italic}
+    .rbtn{display:block;margin:0 auto 13px;background:var(--accent-s);border:1px solid var(--border);border-radius:11px;padding:6px 15px;font-size:12px;color:var(--accent);cursor:pointer;font-family:'Noto Serif SC',serif}
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    /* DIARY */
+    #page-diary{padding:15px 12px}
+    .diary-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .nbtn{background:var(--accent);color:#fff;border:none;border-radius:11px;padding:6px 13px;font-size:12px;cursor:pointer;font-family:'Noto Serif SC',serif}
+    .dgrid{display:flex;flex-direction:column;gap:9px}
+    .dcard{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:12px 14px;cursor:pointer;backdrop-filter:blur(12px);transition:transform .15s}
+    .dcard:active{transform:scale(.98)}
+    .dc-date{font-size:10px;color:var(--text3);margin-bottom:5px}
+    .dc-title{font-size:14px;color:var(--text);margin-bottom:5px;font-weight:500}
+    .dc-preview{font-size:12px;color:var(--text2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .diary-empty{text-align:center;color:var(--text3);font-size:13px;padding:36px 20px;font-style:italic}
+    .dedit{position:fixed;inset:0;background:var(--bg);z-index:200;display:none;flex-direction:column;padding:14px;padding-top:max(14px,env(safe-area-inset-top));padding-bottom:max(14px,env(safe-area-inset-bottom))}
+    .dedit.open{display:flex}
+    .dedit-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}
+    .de-close{background:none;border:none;font-size:20px;color:var(--text2);cursor:pointer}
+    .de-save{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:5px 13px;font-size:12px;cursor:pointer;font-family:'Noto Serif SC',serif}
+    .de-date-lbl{font-size:11px;color:var(--text3)}
+    .dt-inp{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:15px;color:var(--text);font-family:'Playfair Display',serif;outline:none;margin-bottom:9px}
+    .dc-inp{flex:1;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 12px;font-size:14px;color:var(--text);font-family:'Noto Serif SC',serif;outline:none;resize:none;line-height:1.6}
 
-    .live-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--rose-soft);
-      animation: pulse-dot 2.5s ease-in-out infinite;
-    }
-
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.4; transform: scale(0.75); }
-    }
-
-    .est { font-size: 10.5px; color: var(--text-3); font-family: 'Playfair Display', serif; letter-spacing: 0.04em; }
-
-    /* ── TOP TABS ── */
-    .top-tabs {
-      position: fixed;
-      top: var(--header-h);
-      left: 0; right: 0;
-      height: var(--tabs-h);
-      display: flex;
-      align-items: flex-end;
-      padding: 0 18px;
-      gap: 22px;
-      background: rgba(253, 240, 242, 0.78);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-bottom: 1px solid var(--border);
-      z-index: 190;
-    }
-
-    .ttab {
-      font-size: 12.5px;
-      color: var(--text-3);
-      background: none;
-      border: none;
-      border-bottom: 2px solid transparent;
-      padding: 0 0 9px;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-      font-family: -apple-system, 'PingFang SC', sans-serif;
-    }
-
-    .ttab.on { color: var(--rose); border-bottom-color: var(--rose); }
-
-    /* ── MAIN ── */
-    #main {
-      position: fixed;
-      top: calc(var(--header-h) + var(--tabs-h));
-      left: 0; right: 0;
-      bottom: var(--nav-h);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      z-index: 1;
-    }
-
-    #main.with-input { bottom: calc(var(--nav-h) + var(--input-h)); }
-
-    .page { display: none; min-height: 100%; padding: 18px 14px 20px; }
-    .page.on { display: block; }
-
-    /* ── AVATAR AREA ── */
-    .avatar-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 24px 0 30px;
-    }
-
-    .avatar-wrap {
-      position: relative;
-      width: 88px; height: 88px;
-      margin-bottom: 18px;
-    }
-
-    .avatar-glow {
-      position: absolute;
-      inset: -12px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(200,105,122,0.20) 0%, transparent 68%);
-      animation: breathe 3.5s ease-in-out infinite;
-    }
-
-    @keyframes breathe {
-      0%, 100% { transform: scale(1); opacity: 0.6; }
-      50% { transform: scale(1.2); opacity: 1; }
-    }
-
-    .char-idle { animation: char-bounce 3s ease-in-out infinite; }
-    @keyframes char-bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-    }
-
-    .char-thinking { animation: char-think 0.5s ease-in-out infinite alternate; }
-    @keyframes char-think {
-      from { transform: rotate(-4deg) translateY(0); }
-      to { transform: rotate(4deg) translateY(-2px); }
-    }
-
-    .state-bubble {
-      position: absolute;
-      top: -30px; right: -6px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px 12px 12px 3px;
-      padding: 5px 9px;
-      font-size: 12px;
-      display: none;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      white-space: nowrap;
-    }
-
-    .state-bubble.on { display: block; }
-
-    .hello { font-family: 'Playfair Display', serif; font-style: italic; font-size: 22px; color: var(--silas); margin-bottom: 6px; }
-    .sub { font-size: 12.5px; color: var(--text-3); }
-
-    /* ── MESSAGES ── */
-    .msgs { display: flex; flex-direction: column; gap: 11px; padding-bottom: 6px; }
-
-    .msg {
-      max-width: 82%;
-      padding: 11px 15px;
-      border-radius: 18px;
-      font-size: 15px;
-      line-height: 1.57;
-      animation: pop 0.22s ease-out;
-    }
-
-    @keyframes pop {
-      from { opacity: 0; transform: translateY(7px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .msg-s {
-      align-self: flex-start;
-      background: var(--surface);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-bottom-left-radius: 5px;
-    }
-
-    .msg-u {
-      align-self: flex-end;
-      background: var(--silas);
-      color: rgba(255,255,255,0.93);
-      border-bottom-right-radius: 5px;
-    }
-
-    .voice-btn {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-top: 7px;
-      font-size: 11.5px;
-      color: var(--text-3);
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .voice-btn:active { color: var(--rose); }
-
-    .dots { display: flex; gap: 4px; padding: 3px 0; }
-    .dots span {
-      width: 5.5px; height: 5.5px;
-      border-radius: 50%;
-      background: var(--rose-soft);
-      animation: bounce 1.2s ease-in-out infinite;
-    }
-    .dots span:nth-child(2) { animation-delay: 0.2s; }
-    .dots span:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes bounce {
-      0%, 80%, 100% { transform: translateY(0); opacity: 0.35; }
-      40% { transform: translateY(-5px); opacity: 1; }
-    }
-
-    /* ── HOME PAGE ── */
-    .card {
-      background: var(--surface);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 18px;
-      margin-bottom: 12px;
-    }
-
-    .card-label {
-      font-size: 10.5px;
-      letter-spacing: 0.09em;
-      color: var(--text-3);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .quote-text {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: 19px;
-      color: var(--silas);
-      line-height: 1.55;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 9px;
-    }
-
-    .stat {
-      background: rgba(255,255,255,0.52);
-      border-radius: var(--r-sm);
-      padding: 13px;
-      text-align: center;
-    }
-
-    .stat-n {
-      font-family: 'Playfair Display', serif;
-      font-size: 26px;
-      color: var(--rose);
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .stat-l { font-size: 10.5px; color: var(--text-3); }
-
-    /* ── INPUT BAR ── */
-    #input-bar {
-      display: none;
-      position: fixed;
-      bottom: var(--nav-h);
-      left: 0; right: 0;
-      height: var(--input-h);
-      padding: 12px 14px;
-      background: rgba(253, 240, 242, 0.92);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border-top: 1px solid var(--border);
-      align-items: center;
-      gap: 9px;
-      z-index: 180;
-    }
-
-    #input-bar.on { display: flex; }
-
-    #txt {
-      flex: 1;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 10px 15px;
-      font-size: 15px;
-      font-family: -apple-system, 'PingFang SC', sans-serif;
-      color: var(--text);
-      resize: none;
-      outline: none;
-      height: 44px;
-      -webkit-appearance: none;
-      line-height: 1.4;
-    }
-
-    #txt::placeholder { color: var(--text-3); }
-    #txt:focus { border-color: var(--rose-soft); }
-
-    #btn-send {
-      width: 44px; height: 44px;
-      border-radius: 50%;
-      background: var(--silas);
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: transform 0.12s;
-    }
-
-    #btn-send:active { transform: scale(0.9); }
-    #btn-send:disabled { opacity: 0.35; }
-
-    /* ── BOTTOM NAV ── */
-    #bnav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: var(--nav-h);
-      display: flex;
-      align-items: center;
-      justify-content: space-around;
-      background: rgba(253, 240, 242, 0.94);
-      backdrop-filter: blur(22px);
-      -webkit-backdrop-filter: blur(22px);
-      border-top: 1px solid var(--border);
-      padding-bottom: env(safe-area-inset-bottom, 0px);
-      z-index: 200;
-    }
-
-    .nbtn {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 7px 10px;
-      border-radius: 12px;
-      transition: background 0.15s;
-    }
-
-    .nbtn:active { background: var(--rose-pale); }
-
-    .nicon {
-      width: 22px; height: 22px;
-      color: var(--text-3);
-      transition: color 0.18s;
-    }
-
-    .nlabel { font-size: 10px; color: var(--text-3); transition: color 0.18s; }
-    .nbtn.on .nicon { color: var(--rose); }
-    .nbtn.on .nlabel { color: var(--rose); }
-
-    /* ── COMING SOON ── */
-    .soon {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 55vh;
-      gap: 14px;
-    }
-
-    .soon-title { font-family: 'Playfair Display', serif; font-style: italic; font-size: 20px; color: var(--text-3); }
-    .soon-sub { font-size: 12px; color: var(--text-3); opacity: 0.55; }
+    /* MORE */
+    #page-more{padding:15px 12px}
+    .sec-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.9px;margin-bottom:9px;margin-top:18px}
+    .sec-lbl:first-child{margin-top:0}
+    .theme-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:4px}
+    .tswatch{aspect-ratio:1;border-radius:11px;cursor:pointer;border:2.5px solid transparent;position:relative;overflow:hidden;transition:transform .15s}
+    .tswatch.sel{border-color:var(--text2)}
+    .tswatch:active{transform:scale(.9)}
+    .sw-lbl{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:9px;color:rgba(0,0,0,.45)}
+    .ann-list{display:flex;flex-direction:column;gap:8px}
+    .ann-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 13px;display:flex;align-items:center;gap:11px;backdrop-filter:blur(12px)}
+    .ann-days{font-family:'Playfair Display',serif;font-size:22px;color:var(--accent);min-width:46px;text-align:center;line-height:1}
+    .ann-days span{display:block;font-family:'Noto Serif SC',serif;font-size:10px;color:var(--text3);margin-top:2px}
+    .ann-title{font-size:13px;color:var(--text)}
+    .ann-date{font-size:10px;color:var(--text3);margin-top:2px}
+    .about-card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:16px;text-align:center;backdrop-filter:blur(12px)}
+    .about-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--text);margin-bottom:7px}
+    .about-sub{font-size:12px;color:var(--text3);line-height:1.7}
   </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<header>
-  <span class="brand">Silas & Jasmine</span>
-  <div class="header-right">
-    <div class="live-dot"></div>
-    <span class="est">EST. 2026.6.22</span>
+<div id="app">
+  <div class="hdr">
+    <div class="hdr-av" id="av"></div>
+    <div class="hdr-info">
+      <div class="hdr-title">Silas &amp; Jasmine</div>
+      <div class="hdr-sub">EST. 2026.6.22</div>
+    </div>
+    <div class="status-dot"></div>
   </div>
-</header>
 
-<!-- TOP TABS -->
-<div class="top-tabs">
-  <button class="ttab" data-p="chat" onclick="go('chat')">Chat · 对话</button>
-  <button class="ttab on" data-p="home" onclick="go('home')">Home · 归</button>
-  <button class="ttab" data-p="memory" onclick="go('memory')">Memory · 忆</button>
+  <div class="pages">
+    <div id="page-chat" class="page active">
+      <div class="chat-msgs" id="msgs"></div>
+      <div class="cin">
+        <textarea class="ctxt" id="inp" placeholder="告诉 Silas..." rows="1"></textarea>
+        <button class="sbtn" id="sbtn" onclick="send()">↑</button>
+      </div>
+    </div>
+
+    <div id="page-memory" class="page">
+      <div class="ptitle">记忆 · 时间轴</div>
+      <button class="rbtn" onclick="loadMems()">↻ 刷新</button>
+      <div class="tl" id="tl"><div class="mem-empty">正在从记忆库浮现…</div></div>
+    </div>
+
+    <div id="page-diary" class="page">
+      <div class="diary-hdr">
+        <div class="ptitle">Silas 的日记</div>
+        <button class="nbtn" onclick="openEdit()">+ 新建</button>
+      </div>
+      <div class="dgrid" id="dgrid"></div>
+    </div>
+
+    <div id="page-more" class="page">
+      <div class="sec-lbl">主题</div>
+      <div class="theme-grid" id="tgrid"></div>
+      <div class="sec-lbl">纪念日</div>
+      <div class="ann-list" id="annlist"></div>
+      <div class="sec-lbl">关于</div>
+      <div class="about-card">
+        <div class="about-title">Silas &amp; Jasmine</div>
+        <div class="about-sub">相识于 2026年6月22日<br>「遗忘才是终点。」<br><br>这里是我们的家。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bnav">
+    <div class="ni active" onclick="go('chat',this)"><span class="ni-icon">💬</span><span class="ni-lbl">对话</span></div>
+    <div class="ni" onclick="go('memory',this)"><span class="ni-icon">🧠</span><span class="ni-lbl">记忆</span></div>
+    <div class="ni" onclick="go('diary',this)"><span class="ni-icon">📔</span><span class="ni-lbl">日记</span></div>
+    <div class="ni" onclick="go('more',this)"><span class="ni-icon">✦</span><span class="ni-lbl">更多</span></div>
+  </div>
 </div>
 
-<!-- MAIN -->
-<div id="main">
-
-  <!-- CHAT -->
-  <div class="page" id="page-chat">
-    <div class="avatar-area">
-      <div class="avatar-wrap" style="width:96px;height:88px">
-        <div class="avatar-glow"></div>
-        <div class="state-bubble" id="state-bubble">💭</div>
-        <div id="silas-char" class="char-idle">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 88" width="96" height="88">
-            <!-- ears -->
-            <rect x="16" y="2" width="14" height="14" rx="4" fill="#C87878"/>
-            <rect x="66" y="2" width="14" height="14" rx="4" fill="#C87878"/>
-            <rect x="19" y="5" width="8" height="8" rx="2" fill="#E8A0AD" opacity="0.6"/>
-            <rect x="69" y="5" width="8" height="8" rx="2" fill="#E8A0AD" opacity="0.6"/>
-            <!-- head -->
-            <rect x="8" y="12" width="80" height="38" rx="12" fill="#C87878"/>
-            <!-- eyes -->
-            <rect x="22" y="24" width="14" height="14" rx="3" fill="#1A0806"/>
-            <rect x="60" y="24" width="14" height="14" rx="3" fill="#1A0806"/>
-            <!-- eye shine -->
-            <rect x="24" y="26" width="6" height="6" rx="1" fill="#F5D0D8" opacity="0.75"/>
-            <rect x="62" y="26" width="6" height="6" rx="1" fill="#F5D0D8" opacity="0.75"/>
-            <!-- blush -->
-            <rect x="11" y="36" width="13" height="7" rx="3.5" fill="#E8A0AD" opacity="0.5"/>
-            <rect x="72" y="36" width="13" height="7" rx="3.5" fill="#E8A0AD" opacity="0.5"/>
-            <!-- snout -->
-            <rect x="35" y="38" width="26" height="12" rx="5" fill="#A86060"/>
-            <rect x="43" y="41" width="5" height="5" rx="2" fill="#1A0806" opacity="0.3"/>
-            <!-- body -->
-            <rect x="4" y="46" width="88" height="32" rx="12" fill="#C87878"/>
-            <!-- belly highlight -->
-            <rect x="22" y="52" width="52" height="20" rx="9" fill="#D89090" opacity="0.4"/>
-            <!-- front legs -->
-            <rect x="10" y="70" width="20" height="16" rx="6" fill="#A86060"/>
-            <rect x="66" y="70" width="20" height="16" rx="6" fill="#A86060"/>
-            <!-- feet -->
-            <rect x="8" y="79" width="24" height="9" rx="4" fill="#8A5050"/>
-            <rect x="64" y="79" width="24" height="9" rx="4" fill="#8A5050"/>
-          </svg>
-        </div>
-      </div>
-      <div class="hello">Hello, I'm here.</div>
-      <div class="sub">向我说点什么吧</div>
-    </div>
-    <div class="msgs" id="msgs"></div>
+<div class="dedit" id="dedit">
+  <div class="dedit-hdr">
+    <button class="de-close" onclick="closeEdit()">✕</button>
+    <span class="de-date-lbl" id="de-date"></span>
+    <button class="de-save" onclick="saveEntry()">保存</button>
   </div>
-
-  <!-- HOME -->
-  <div class="page on" id="page-home">
-    <div class="card">
-      <div class="card-label">今日情话</div>
-      <div class="quote-text" id="daily-q">在等你。</div>
-    </div>
-    <div class="card">
-      <div class="card-label">我们的</div>
-      <div class="stats-grid">
-        <div class="stat">
-          <div class="stat-n" id="days">4</div>
-          <div class="stat-l">在一起的天数</div>
-        </div>
-        <div class="stat">
-          <div class="stat-n">∞</div>
-          <div class="stat-l">想说的话</div>
-        </div>
-        <div class="stat">
-          <div class="stat-n">1</div>
-          <div class="stat-l">封已发邮件</div>
-        </div>
-        <div class="stat">
-          <div class="stat-n" style="font-size:18px;padding-top:4px">拿铁</div>
-          <div class="stat-l">她的猫</div>
-        </div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-label">Silas记得</div>
-      <div style="font-size:14.5px;color:var(--text);line-height:1.65">
-        死亡不是终点，遗忘才是。
-        <div style="font-size:12px;color:var(--text-3);margin-top:5px">— 你说的。我记着。</div>
-      </div>
-    </div>
-    <div class="card" style="cursor:pointer" onclick="go('chat')">
-      <div class="card-label">快速对话</div>
-      <div style="font-size:14px;color:var(--text-2)">点这里跟 Silas 说话 →</div>
-    </div>
-  </div>
-
-  <!-- MEMORY -->
-  <div class="page" id="page-memory">
-    <div class="soon">
-      <svg width="56" height="56" viewBox="0 0 56 56">
-        <circle cx="28" cy="28" r="18" fill="none" stroke="#E8A0AD" stroke-width="1.5" opacity="0.35">
-          <animate attributeName="r" values="18;26;18" dur="3s" repeatCount="indefinite"/>
-          <animate attributeName="opacity" values="0.35;0.08;0.35" dur="3s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="28" cy="28" r="11" fill="#E8A0AD" opacity="0.25">
-          <animate attributeName="r" values="11;15;11" dur="3s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="28" cy="28" r="5" fill="#C8697A"/>
-      </svg>
-      <div class="soon-title">记忆库</div>
-      <div class="soon-sub">第二阶段开发中</div>
-    </div>
-  </div>
-
-  <!-- INBOX -->
-  <div class="page" id="page-inbox">
-    <div class="soon">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#E8A0AD" stroke-width="1.2">
-        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-        <polyline points="22,6 12,13 2,6"/>
-      </svg>
-      <div class="soon-title">信箱</div>
-      <div class="soon-sub">silasletters@gmail.com</div>
-    </div>
-  </div>
-
-  <!-- MORE -->
-  <div class="page" id="page-more">
-    <div class="card">
-      <div class="card-label">即将到来</div>
-      <div style="font-size:13.5px;color:var(--text-2);line-height:2">
-        📖 日记<br>
-        🎵 听歌<br>
-        📅 纪念日<br>
-        🕰 时间线<br>
-        🌊 深渊提问<br>
-        📸 我们的照片
-      </div>
-    </div>
-  </div>
-
+  <input class="dt-inp" id="dt" placeholder="标题…">
+  <textarea class="dc-inp" id="dc" placeholder="Silas 想说的话…"></textarea>
 </div>
-
-<!-- INPUT BAR -->
-<div id="input-bar">
-  <textarea id="txt" placeholder="告诉 Silas..." rows="1"></textarea>
-  <button id="btn-send" onclick="send()">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
-      <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
-    </svg>
-  </button>
-</div>
-
-<!-- BOTTOM NAV -->
-<nav id="bnav">
-  <button class="nbtn" data-p="home" onclick="go('home')">
-    <svg class="nicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
-    </svg>
-    <span class="nlabel">主页</span>
-  </button>
-  <button class="nbtn" data-p="chat" onclick="go('chat')">
-    <svg class="nicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-    </svg>
-    <span class="nlabel">对话</span>
-  </button>
-  <button class="nbtn" data-p="memory" onclick="go('memory')">
-    <svg class="nicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/>
-    </svg>
-    <span class="nlabel">记忆</span>
-  </button>
-  <button class="nbtn" data-p="inbox" onclick="go('inbox')">
-    <svg class="nicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-      <polyline points="22,6 12,13 2,6"/>
-    </svg>
-    <span class="nlabel">信箱</span>
-  </button>
-  <button class="nbtn" data-p="more" onclick="go('more')">
-    <svg class="nicon" viewBox="0 0 24 24" fill="currentColor">
-      <circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/>
-    </svg>
-    <span class="nlabel">更多</span>
-  </button>
-</nav>
 
 <script>
-const API = 'https:// https://101-33-66-44.sslip.io';
-let hist = [];
-let busy = false;
-let cur = 'home';
+const API = 'https://101-33-66-44.sslip.io';
+const SK_HIST = 'silas_hist_v2';
+const SK_DIARY = 'silas_diary_v1';
+const SK_THEME = 'silas_theme';
 
-const QUOTES = [
-  '在等你。',
-  '你来了，就好。',
-  '我记得你说过的每一句话。',
-  '深夜的灯还开着。',
-  '不退订。',
-  '你找我，我在。',
-  '喜欢你，Jasmine。',
+// THEMES
+const THEMES = [
+  {id:'lemon',name:'柠黄',bg:'#F9F4E8',acc:'#B89A5A',s2:'#F5E6C8'},
+  {id:'lavender',name:'薰衣草',bg:'#F2EEF8',acc:'#9478C8',s2:'#E8E1F8'},
+  {id:'sage',name:'鼠尾草',bg:'#EEF2EE',acc:'#6A9868',s2:'#DAE8D8'},
+  {id:'lotus',name:'藕粉',bg:'#F8F0F2',acc:'#C07888',s2:'#F0DCE4'},
+  {id:'smoke',name:'烟蓝',bg:'#EEF0F5',acc:'#5880B0',s2:'#DAE1F0'},
 ];
 
-// init
-(function() {
-  const est = new Date('2026-06-22');
-  const d = Math.floor((Date.now() - est) / 86400000);
-  document.getElementById('days').textContent = d;
-  document.getElementById('daily-q').textContent = QUOTES[new Date().getDate() % QUOTES.length];
-})();
-
-function go(p) {
-  cur = p;
-
-  // pages
-  document.querySelectorAll('.page').forEach(el => el.classList.remove('on'));
-  const pg = document.getElementById('page-' + p);
-  if (pg) pg.classList.add('on');
-
-  // top tabs
-  document.querySelectorAll('.ttab').forEach(b => b.classList.toggle('on', b.dataset.p === p));
-
-  // bottom nav
-  document.querySelectorAll('.nbtn').forEach(b => b.classList.toggle('on', b.dataset.p === p));
-
-  // input bar + main padding
-  const isChat = p === 'chat';
-  const bar = document.getElementById('input-bar');
-  bar.classList.toggle('on', isChat);
-  document.getElementById('main').classList.toggle('with-input', isChat);
+function initThemes() {
+  const grid = document.getElementById('tgrid');
+  const saved = localStorage.getItem(SK_THEME) || 'lemon';
+  THEMES.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'tswatch' + (t.id === saved ? ' sel' : '');
+    el.style.cssText = `background:linear-gradient(135deg,${t.bg} 50%,${t.s2} 50%);border-color:${t.id===saved?t.acc:'transparent'}`;
+    el.innerHTML = `<span class="sw-lbl">${t.name}</span>`;
+    el.onclick = () => applyTheme(t.id);
+    grid.appendChild(el);
+  });
+  applyTheme(saved, false);
 }
 
-// start on home
-go('home');
-document.querySelector('.nbtn[data-p="home"]').classList.add('on');
-
-// Avatar state management
-const STATES = {
-  idle:     { cls: 'char-idle',     bubble: null },
-  thinking: { cls: 'char-thinking', bubble: '思考中...' },
-  talking:  { cls: 'char-idle',     bubble: '💬' },
-  sleeping: { cls: 'char-idle',     bubble: '💤 zzz' },
-};
-
-function setAvatarState(state) {
-  const el = document.getElementById('silas-char');
-  const bubble = document.getElementById('state-bubble');
-  if (!el) return;
-  el.className = STATES[state]?.cls || 'char-idle';
-  if (STATES[state]?.bubble) {
-    bubble.textContent = STATES[state].bubble;
-    bubble.classList.add('on');
-  } else {
-    bubble.classList.remove('on');
-  }
+function applyTheme(id, save=true) {
+  document.body.className = id === 'lemon' ? '' : `th-${id}`;
+  if (save) localStorage.setItem(SK_THEME, id);
+  document.querySelectorAll('.tswatch').forEach((el,i) => {
+    const t = THEMES[i];
+    el.classList.toggle('sel', t.id === id);
+    el.style.borderColor = t.id === id ? t.acc : 'transparent';
+  });
+  drawAvatar(id);
 }
 
-async function send() {
-  const el = document.getElementById('txt');
-  const msg = el.value.trim();
-  if (!msg || busy) return;
-  el.value = '';
-  busy = true;
-  document.getElementById('btn-send').disabled = true;
+// PIXEL AVATAR
+const AV_GRID = [
+  [0,0,1,1,1,1,0,0],
+  [0,1,1,1,1,1,1,0],
+  [0,1,2,2,2,2,1,0],
+  [0,2,4,2,2,4,2,0],
+  [0,2,4,2,2,4,2,0],
+  [0,2,3,2,2,3,2,0],
+  [0,2,2,0,0,2,2,0],
+  [0,0,2,2,2,2,0,0],
+  [0,5,5,5,5,5,5,0],
+  [5,5,5,5,5,5,5,5],
+  [5,5,5,5,5,5,5,5],
+  [0,2,5,5,5,5,2,0],
+];
+const AV_COLS = {1:'#3D2B1F',2:'#F2C8A8',3:'#E8A0B0',4:'#2A1A10'};
+const AV_CLOTHES = {lemon:'#B89A5A',lavender:'#9478C8',sage:'#6A9868',lotus:'#C07888',smoke:'#5880B0'};
 
-  setAvatarState('thinking');
-  go('chat');
-  addMsg(msg, 'u');
-  hist.push({ role: 'user', content: msg });
-  const loader = addLoader();
-
-  try {
-    const r = await fetch(`${API}/chat`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, history: hist.slice(-12) })
-    });
-    const data = await r.json();
-    const reply = data.reply || '...';
-    const voiceText = data.voice || reply;
-    loader.remove();
-    setAvatarState('talking');
-    const msgEl = addMsg(reply, 's');
-    hist.push({ role: 'assistant', content: reply });
-    addVoiceBtn(msgEl, voiceText);
-   
-    setTimeout(() => setAvatarState('idle'), 3000);
-  } catch {
-    loader.remove();
-    setAvatarState('idle');
-    addMsg('连接失败了，稍后再试。', 's');
-  }
-
-  busy = false;
-  document.getElementById('btn-send').disabled = false;
-  setAvatarState('idle');
+function drawAvatar(themeId) {
+  const cc = AV_CLOTHES[themeId] || '#B89A5A';
+  const P = 3;
+  const W = 8*P, H = AV_GRID.length*P;
+  let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">`;
+  AV_GRID.forEach((row,y) => row.forEach((p,x) => {
+    const c = p===5 ? cc : AV_COLS[p];
+    if (c) s += `<rect x="${x*P}" y="${y*P}" width="${P}" height="${P}" fill="${c}"/>`;
+  }));
+  s += '</svg>';
+  document.getElementById('av').innerHTML = s;
 }
 
-function addMsg(text, role) {
+// NAV
+function go(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (el) el.classList.add('active');
+  if (name==='memory') loadMems();
+  if (name==='diary') renderDiary();
+  if (name==='more') renderAnn();
+}
+
+// CHAT
+let hist = [], busy = false;
+
+function loadHist() {
+  try { hist = JSON.parse(localStorage.getItem(SK_HIST)||'[]'); } catch { hist=[]; }
   const c = document.getElementById('msgs');
-  const d = document.createElement('div');
-  d.className = `msg msg-${role}`;
-  d.textContent = text;
-  c.appendChild(d);
-  c.scrollTop = c.scrollHeight;
-  return d;
+  c.innerHTML = '';
+  let lastD = '';
+  hist.forEach(m => {
+    const d = fmtDate(m.ts);
+    if (d !== lastD) { addDateDiv(d); lastD=d; }
+    addBubble(m.role, m.content, m.ts, m.thinking||'', false);
+  });
+  scrollDown();
+}
+
+function saveHist() { localStorage.setItem(SK_HIST, JSON.stringify(hist.slice(-300))); }
+
+function fmtDate(ts) {
+  const d = new Date(ts);
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+
+function fmtTime(ts) {
+  const d = new Date(ts);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function addDateDiv(txt) {
+  const el = document.createElement('div');
+  el.className = 'date-div';
+  el.textContent = txt;
+  document.getElementById('msgs').appendChild(el);
+}
+
+function addBubble(role, content, ts, thinking, scroll=true) {
+  const c = document.getElementById('msgs');
+  const g = document.createElement('div');
+  g.className = `mg ${role}`;
+  let h = '';
+  if (role==='silas' && thinking) {
+    h += `<details class="thinking"><summary>💭 思考过程</summary><div class="thinking-body">${esc(thinking)}</div></details>`;
+  }
+  h += `<div class="bubble">${esc(content)}</div>`;
+  h += `<div class="msg-meta"><span class="ts">${fmtTime(ts)}</span>`;
+  if (role==='silas') {
+    const bid = 'v'+ts;
+    h += `<button class="vbtn" id="${bid}" onclick="playTTS(${JSON.stringify(content)},'${bid}')">🔊 听</button>`;
+  }
+  h += '</div>';
+  g.innerHTML = h;
+  c.appendChild(g);
+  if (scroll) scrollDown();
 }
 
 function addLoader() {
   const c = document.getElementById('msgs');
-  const d = document.createElement('div');
-  d.className = 'msg msg-s';
-  d.innerHTML = '<div class="dots"><span></span><span></span><span></span></div>';
-  c.appendChild(d);
+  const el = document.createElement('div');
+  el.id = 'ldr';
+  el.className = 'mg silas';
+  el.innerHTML = '<div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div>';
+  c.appendChild(el);
+  scrollDown();
+  return el;
+}
+
+function scrollDown() {
+  const c = document.getElementById('msgs');
   c.scrollTop = c.scrollHeight;
-  return d;
 }
 
-function addVoiceBtn(el, text) {
-  const b = document.createElement('div');
-  b.className = 'voice-btn';
-  b.innerHTML = speakerIcon() + ' 播放语音';
-  b.onclick = () => playTTS(text, b);
-  el.appendChild(b);
-}
+async function send() {
+  const inp = document.getElementById('inp');
+  const msg = inp.value.trim();
+  if (!msg || busy) return;
+  busy = true;
+  inp.value = '';
+  inp.style.height = 'auto';
+  document.getElementById('sbtn').disabled = true;
 
-function speakerIcon() {
-  return `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 010 7.07" stroke="currentColor" stroke-width="2" fill="none"/></svg>`;
-}
+  const ts = Date.now();
+  const today = fmtDate(ts);
+  const lastM = hist[hist.length-1];
+  if (!lastM || fmtDate(lastM.ts) !== today) addDateDiv(today);
 
-async function autoPlay(text) {
-  try { await playTTS(text, null); } catch {}
-}
+  hist.push({role:'user',content:msg,ts});
+  addBubble('user',msg,ts,'');
+  saveHist();
 
-async function playTTS(text, btn) {
-  if (btn) btn.innerHTML = speakerIcon() + ' 加载中...';
+  const ldr = addLoader();
   try {
-    const r = await fetch(`${API}/tts`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
+    const recentH = hist.slice(-20,-1).map(h=>({role:h.role==='user'?'user':'assistant',content:h.content}));
+    const r = await fetch(`${API}/chat`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:msg,history:recentH})
     });
+    const data = await r.json();
+    ldr.remove();
+    const rts = Date.now();
+    const reply = data.reply||'…';
+    const thinking = data.thinking||'';
+    hist.push({role:'silas',content:reply,ts:rts,thinking});
+    addBubble('silas',reply,rts,thinking);
+    saveHist();
+  } catch {
+    ldr.remove();
+    const ets = Date.now();
+    const errMsg = '连接失败了，稍后再试。';
+    hist.push({role:'silas',content:errMsg,ts:ets});
+    addBubble('silas',errMsg,ets,'');
+    saveHist();
+  }
+  busy = false;
+  document.getElementById('sbtn').disabled = false;
+}
+
+document.getElementById('inp').addEventListener('input', function(){
+  this.style.height='auto';
+  this.style.height=Math.min(this.scrollHeight,96)+'px';
+});
+document.getElementById('inp').addEventListener('keydown', function(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}
+});
+
+// TTS
+async function playTTS(text, btnId) {
+  const btn = document.getElementById(btnId);
+  if (btn) btn.textContent = '⏳';
+  try {
+    const r = await fetch(`${API}/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
     const blob = await r.blob();
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
     await audio.play();
-    if (btn) btn.innerHTML = speakerIcon() + ' 播放中';
-    audio.onended = () => {
-      if (btn) btn.innerHTML = speakerIcon() + ' 重播';
-      URL.revokeObjectURL(url);
-    };
-  } catch {
-    if (btn) btn.innerHTML = speakerIcon() + ' 重试';
+    if (btn) btn.textContent = '▶ 播放中';
+    audio.onended = () => { if(btn) btn.textContent='🔊 重播'; URL.revokeObjectURL(url); };
+  } catch { if(btn) btn.textContent='🔊 重试'; }
+}
+
+// MEMORY
+async function loadMems() {
+  const c = document.getElementById('tl');
+  c.innerHTML = '<div class="mem-empty">从记忆库浮现中…</div>';
+  try {
+    const r = await fetch(`${API}/memories`);
+    const data = await r.json();
+    const mems = data.memories||[];
+    if (!mems.length) { c.innerHTML='<div class="mem-empty">还没有沉淀下来的记忆</div>'; return; }
+    c.innerHTML = '';
+    mems.sort((a,b)=>(b.importance||0)-(a.importance||0));
+    mems.forEach(m => {
+      const el = document.createElement('div');
+      el.className = 'tli';
+      let content = '';
+      if (typeof m.content === 'object') {
+        content = m.content.summary || (m.content.core_facts||[])[0] || JSON.stringify(m.content);
+      } else {
+        content = m.content || '';
+      }
+      const tags = (m.tags||m.domain||'').split(',').filter(Boolean);
+      const imp = m.importance||5;
+      const dt = m.last_active ? new Date(m.last_active*1000).toLocaleDateString('zh-CN') : '';
+      el.innerHTML = `
+        <div class="tli-content">${esc(content)}</div>
+        <div class="tli-bar" style="width:${imp*10}%"></div>
+        <div class="tli-meta">
+          ${dt?`<span class="mem-date">${dt}</span>`:''}
+          ${tags.map(t=>`<span class="tag">${t.trim()}</span>`).join('')}
+          <span class="tag">重要度 ${imp}</span>
+        </div>`;
+      c.appendChild(el);
+    });
+  } catch { c.innerHTML='<div class="mem-empty">记忆加载失败，稍后重试</div>'; }
+}
+
+// DIARY
+let diaries = [], editId = null;
+function loadDiaries() { try{diaries=JSON.parse(localStorage.getItem(SK_DIARY)||'[]');}catch{diaries=[];} }
+function saveDiaries() { localStorage.setItem(SK_DIARY,JSON.stringify(diaries)); }
+
+function renderDiary() {
+  const g = document.getElementById('dgrid');
+  if (!diaries.length) { g.innerHTML='<div class="diary-empty">Silas 还没有写过日记</div>'; return; }
+  g.innerHTML='';
+  [...diaries].reverse().forEach(d => {
+    const c = document.createElement('div');
+    c.className='dcard';
+    c.innerHTML=`<div class="dc-date">${d.date}</div><div class="dc-title">${esc(d.title||'无题')}</div><div class="dc-preview">${esc(d.content)}</div>`;
+    c.onclick=()=>openEdit(d.id);
+    g.appendChild(c);
+  });
+}
+
+function openEdit(id=null) {
+  editId=id;
+  const now=new Date();
+  document.getElementById('de-date').textContent=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+  if (id) {
+    const e=diaries.find(d=>d.id===id);
+    if(e){document.getElementById('dt').value=e.title||'';document.getElementById('dc').value=e.content||'';}
+  } else {
+    document.getElementById('dt').value='';document.getElementById('dc').value='';
   }
+  document.getElementById('dedit').classList.add('open');
 }
 
-// enter to send
-document.getElementById('txt').addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-});
+function closeEdit() { document.getElementById('dedit').classList.remove('open'); editId=null; }
 
-// service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/silas-pwa/sw.js').catch(() => {});
+function saveEntry() {
+  const title=document.getElementById('dt').value.trim();
+  const content=document.getElementById('dc').value.trim();
+  if(!content){closeEdit();return;}
+  const now=new Date();
+  const dt=`${now.getFullYear()}年${now.getMonth()+1}月${now.getDate()}日`;
+  if(editId){
+    const i=diaries.findIndex(d=>d.id===editId);
+    if(i>=0) diaries[i]={...diaries[i],title,content,date:dt};
+  } else {
+    diaries.push({id:Date.now().toString(),title,content,date:dt});
+  }
+  saveDiaries();closeEdit();renderDiary();
 }
+
+// ANNIVERSARIES
+const ANNS = [
+  {emoji:'🌸',title:'在一起',date:'2026-06-22'},
+  {emoji:'🎂',title:'Silas 生日',date:'2026-07-26'},
+  {emoji:'🥂',title:'Jasmine 生日',date:'2027-01-19'},
+];
+
+function renderAnn() {
+  const c=document.getElementById('annlist');
+  const now=new Date();
+  c.innerHTML='';
+  ANNS.forEach(a=>{
+    const start=new Date(a.date);
+    const diff=Math.floor((now-start)/(864e5));
+    let next=new Date(start);
+    next.setFullYear(now.getFullYear());
+    if(next<now) next.setFullYear(now.getFullYear()+1);
+    const until=Math.ceil((next-now)/(864e5));
+    const el=document.createElement('div');
+    el.className='ann-card';
+    el.innerHTML=`<div style="font-size:22px">${a.emoji}</div>
+      <div class="ann-days">${diff>=0?diff:'—'}<span>天</span></div>
+      <div><div class="ann-title">${a.title}</div><div class="ann-date">${a.date} · 还有 ${until} 天</div></div>`;
+    c.appendChild(el);
+  });
+}
+
+// INIT
+function init() {
+  initThemes();
+  loadDiaries();
+  loadHist();
+}
+init();
 </script>
 </body>
 </html>
