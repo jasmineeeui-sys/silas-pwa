@@ -77,10 +77,19 @@
     .ni-lbl{font-size:10px;margin-top:1px;display:block}
 
     /* CHAT */
-    .chat-msgs{flex:1;padding:14px 11px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
+    .chat-ctrl{display:flex;gap:7px;padding:7px 12px 0;justify-content:flex-end}
+    .cctrl-btn{background:var(--accent-s);border:1px solid var(--border);border-radius:9px;padding:4px 10px;font-size:11px;color:var(--text2);cursor:pointer;font-family:'Noto Serif SC',serif;transition:background .2s}
+    .cctrl-btn:hover{background:var(--user-bg)}
+    .chat-msgs{flex:1;padding:10px 11px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
     .mg{display:flex;flex-direction:column;gap:3px}
     .mg.user{align-items:flex-end}
     .mg.silas{align-items:flex-start}
+    .mg-row{display:flex;align-items:flex-end;gap:6px}
+    .mg.user .mg-row{flex-direction:row-reverse}
+    .bav{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'Playfair Display',serif;font-weight:bold;border:1px solid var(--border)}
+    .bav.s{background:var(--silas-bg);color:var(--accent)}
+    .bav.u{background:var(--user-bg);color:var(--text2)}
+    .mem-event{font-size:10px;color:var(--text3);text-align:center;padding:2px 0;opacity:.7;font-style:italic}
     .bubble{max-width:80%;padding:10px 14px;border-radius:18px;line-height:1.6;font-size:14px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);word-break:break-word}
     .mg.user .bubble{background:var(--user-bg);border:1px solid var(--border);border-radius:18px 18px 4px 18px;box-shadow:0 1px 4px var(--shadow)}
     .mg.silas .bubble{background:var(--silas-bg);border:1px solid var(--border);border-radius:18px 18px 18px 4px;box-shadow:0 3px 12px var(--shadow)}
@@ -190,6 +199,10 @@
 
   <div class="pages">
     <div id="page-chat" class="page active">
+      <div class="chat-ctrl">
+        <button class="cctrl-btn" onclick="newConversation()">新对话</button>
+        <button class="cctrl-btn" onclick="clearHistory()">清空历史</button>
+      </div>
       <div class="chat-msgs" id="msgs"></div>
       <div class="cin">
         <textarea class="ctxt" id="inp" placeholder="告诉 Silas..." rows="1"></textarea>
@@ -374,6 +387,10 @@ function addBubble(role, content, ts, thinking, voiceText='', scroll=true) {
   if (role==='silas' && thinking) {
     h += `<details class="thinking"><summary>💭 思考过程</summary><div class="thinking-body">${esc(thinking)}</div></details>`;
   }
+  const avHtml = role==='silas'
+    ? `<div class="bav s">S</div>`
+    : `<div class="bav u">J</div>`;
+  h += `<div class="mg-row">${avHtml}<div style="display:flex;flex-direction:column;gap:2px;min-width:0">`;
   h += `<div class="bubble">${esc(content)}</div>`;
   h += `<div class="msg-meta"><span class="ts">${fmtTime(ts)}</span></div>`;
   if (role==='silas' && voiceText) {
@@ -384,9 +401,33 @@ function addBubble(role, content, ts, thinking, voiceText='', scroll=true) {
       <span class="voice-label">${esc(voiceText)}</span>
     </div>`;
   }
+  h += `</div></div>`;
   g.innerHTML = h;
   c.appendChild(g);
   if (scroll) scrollDown();
+}
+
+function addMemEvent(text) {
+  const c = document.getElementById('msgs');
+  const el = document.createElement('div');
+  el.className = 'mem-event';
+  el.textContent = `✦ ${text}`;
+  c.appendChild(el);
+  scrollDown();
+}
+
+function newConversation() {
+  document.getElementById('msgs').innerHTML = '';
+  const ts = Date.now();
+  const dateStr = new Date(ts).toLocaleDateString('zh-CN',{month:'long',day:'numeric'});
+  addDateDiv(dateStr);
+}
+
+function clearHistory() {
+  if (!confirm('清空所有对话历史？')) return;
+  hist = [];
+  localStorage.removeItem(SK_HIST);
+  document.getElementById('msgs').innerHTML = '';
 }
 
 function addLoader() {
@@ -440,6 +481,7 @@ async function send() {
     hist.push({role:'silas',content:reply,ts:rts,thinking,voiceText});
     addBubble('silas',reply,rts,thinking,voiceText);
     saveHist();
+    setTimeout(()=>addMemEvent('Silas 正在记忆这段对话…'), 1500);
   } catch {
     ldr.remove();
     const ets = Date.now();
@@ -460,33 +502,36 @@ document.getElementById('inp').addEventListener('keydown', function(e){
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}
 });
 
-// TTS
+// TTS — audio element created before async to preserve user-gesture context
 async function playTTS(text, barId) {
   const bar = document.getElementById(barId);
   if (!bar || bar.classList.contains('playing')) return;
   const icon = bar.querySelector('.voice-icon');
+  const audio = new Audio(); // must be synchronous with click
   if (icon) icon.textContent = '⏳';
+  bar.classList.add('playing');
   try {
     const r = await fetch(`${API}/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
-    if (!r.ok) throw new Error('tts failed');
+    if (!r.ok) throw new Error('tts '+r.status);
     const blob = await r.blob();
     const url = URL.createObjectURL(blob);
-    const audio = new Audio(url);
-    bar.classList.add('playing');
+    audio.src = url;
     if (icon) icon.textContent = '🔊';
     audio.onended = () => {
       bar.classList.remove('playing');
       if (icon) icon.textContent = '🔈';
       URL.revokeObjectURL(url);
     };
-    audio.play().catch(() => {
+    audio.onerror = () => {
       bar.classList.remove('playing');
       if (icon) icon.textContent = '❌';
       URL.revokeObjectURL(url);
-    });
-  } catch {
+    };
+    await audio.play();
+  } catch(e) {
     bar.classList.remove('playing');
     if (icon) icon.textContent = '❌';
+    console.error('TTS error:', e);
   }
 }
 
