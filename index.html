@@ -103,6 +103,7 @@
     .voice-bar.playing .voice-wave span:nth-child(5){animation-delay:.15s}
     @keyframes vwave{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.3)}}
     .voice-dur{font-size:11px;color:var(--text2);font-family:'Noto Serif SC',serif}
+    .voice-label{font-size:12px;color:var(--text2);font-family:'Noto Serif SC',serif;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
     .thinking{max-width:80%;margin-bottom:2px}
     .thinking summary{font-size:11px;color:var(--text3);cursor:pointer;user-select:none;padding:3px 9px;border-radius:8px;background:var(--accent-s);display:inline-flex;align-items:center;gap:4px;list-style:none}
     .thinking summary::-webkit-details-marker{display:none}
@@ -375,6 +376,7 @@ function addBubble(role, content, ts, thinking, voiceText='', scroll=true) {
     h += `<div class="voice-bar" id="${vid}" onclick="playTTS(${JSON.stringify(voiceText)},'${vid}')">
       <span class="voice-icon">🔈</span>
       <div class="voice-wave"><span></span><span></span><span></span><span></span><span></span></div>
+      <span class="voice-label">${esc(voiceText)}</span>
     </div>`;
   }
   g.innerHTML = h;
@@ -461,17 +463,26 @@ async function playTTS(text, barId) {
   if (icon) icon.textContent = '⏳';
   try {
     const r = await fetch(`${API}/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    if (!r.ok) throw new Error('tts failed');
     const blob = await r.blob();
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
-    bar.classList.add('playing');
-    if (icon) icon.textContent = '🔊';
-    await audio.play();
+    audio.oncanplaythrough = () => {
+      bar.classList.add('playing');
+      if (icon) icon.textContent = '🔊';
+      audio.play().catch(()=>{ bar.classList.remove('playing'); if(icon) icon.textContent='❌'; });
+    };
     audio.onended = () => {
       bar.classList.remove('playing');
       if (icon) icon.textContent = '🔈';
       URL.revokeObjectURL(url);
     };
+    audio.onerror = () => {
+      bar.classList.remove('playing');
+      if (icon) icon.textContent = '❌';
+      URL.revokeObjectURL(url);
+    };
+    audio.load();
   } catch {
     bar.classList.remove('playing');
     if (icon) icon.textContent = '❌';
