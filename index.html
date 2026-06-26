@@ -86,8 +86,23 @@
     .mg.silas .bubble{background:var(--silas-bg);border:1px solid var(--border);border-radius:17px 17px 17px 4px;box-shadow:0 2px 8px var(--shadow)}
     .msg-meta{display:flex;align-items:center;gap:7px;padding:0 3px}
     .ts{font-size:10px;color:var(--text3)}
-    .vbtn{background:var(--accent-s);border:1px solid var(--border);border-radius:9px;padding:2px 8px;font-size:11px;color:var(--accent);cursor:pointer;transition:background .2s;font-family:'Noto Serif SC',serif}
-    .vbtn:hover{background:var(--user-bg)}
+    .voice-bar{display:flex;align-items:center;gap:8px;background:var(--silas-bg);border:1px solid var(--border);border-radius:17px 17px 17px 4px;padding:8px 14px;cursor:pointer;max-width:150px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 2px 8px var(--shadow);transition:opacity .2s;margin-top:2px}
+    .voice-bar:active{opacity:.7}
+    .voice-icon{font-size:15px;flex-shrink:0}
+    .voice-wave{display:flex;align-items:center;gap:2px;height:16px}
+    .voice-wave span{display:block;width:3px;background:var(--accent);border-radius:2px;transition:height .3s}
+    .voice-wave span:nth-child(1){height:5px}
+    .voice-wave span:nth-child(2){height:11px}
+    .voice-wave span:nth-child(3){height:7px}
+    .voice-wave span:nth-child(4){height:13px}
+    .voice-wave span:nth-child(5){height:6px}
+    .voice-bar.playing .voice-wave span{animation:vwave .7s ease-in-out infinite}
+    .voice-bar.playing .voice-wave span:nth-child(2){animation-delay:.1s}
+    .voice-bar.playing .voice-wave span:nth-child(3){animation-delay:.2s}
+    .voice-bar.playing .voice-wave span:nth-child(4){animation-delay:.05s}
+    .voice-bar.playing .voice-wave span:nth-child(5){animation-delay:.15s}
+    @keyframes vwave{0%,100%{transform:scaleY(1)}50%{transform:scaleY(.3)}}
+    .voice-dur{font-size:11px;color:var(--text2);font-family:'Noto Serif SC',serif}
     .thinking{max-width:80%;margin-bottom:2px}
     .thinking summary{font-size:11px;color:var(--text3);cursor:pointer;user-select:none;padding:3px 9px;border-radius:8px;background:var(--accent-s);display:inline-flex;align-items:center;gap:4px;list-style:none}
     .thinking summary::-webkit-details-marker{display:none}
@@ -317,7 +332,7 @@ function loadHist() {
   hist.forEach(m => {
     const d = fmtDate(m.ts);
     if (d !== lastD) { addDateDiv(d); lastD=d; }
-    addBubble(m.role, m.content, m.ts, m.thinking||'', false);
+    addBubble(m.role, m.content, m.ts, m.thinking||'', m.voiceText||'', false);
   });
   scrollDown();
 }
@@ -345,7 +360,7 @@ function addDateDiv(txt) {
   document.getElementById('msgs').appendChild(el);
 }
 
-function addBubble(role, content, ts, thinking, scroll=true) {
+function addBubble(role, content, ts, thinking, voiceText='', scroll=true) {
   const c = document.getElementById('msgs');
   const g = document.createElement('div');
   g.className = `mg ${role}`;
@@ -354,12 +369,14 @@ function addBubble(role, content, ts, thinking, scroll=true) {
     h += `<details class="thinking"><summary>💭 思考过程</summary><div class="thinking-body">${esc(thinking)}</div></details>`;
   }
   h += `<div class="bubble">${esc(content)}</div>`;
-  h += `<div class="msg-meta"><span class="ts">${fmtTime(ts)}</span>`;
-  if (role==='silas') {
-    const bid = 'v'+ts;
-    h += `<button class="vbtn" id="${bid}" onclick="playTTS(${JSON.stringify(content)},'${bid}')">🔊 听</button>`;
+  h += `<div class="msg-meta"><span class="ts">${fmtTime(ts)}</span></div>`;
+  if (role==='silas' && voiceText) {
+    const vid = 'vb'+ts;
+    h += `<div class="voice-bar" id="${vid}" onclick="playTTS(${JSON.stringify(voiceText)},'${vid}')">
+      <span class="voice-icon">🔈</span>
+      <div class="voice-wave"><span></span><span></span><span></span><span></span><span></span></div>
+    </div>`;
   }
-  h += '</div>';
   g.innerHTML = h;
   c.appendChild(g);
   if (scroll) scrollDown();
@@ -412,8 +429,9 @@ async function send() {
     const rts = Date.now();
     const reply = data.reply||'…';
     const thinking = data.thinking||'';
-    hist.push({role:'silas',content:reply,ts:rts,thinking});
-    addBubble('silas',reply,rts,thinking);
+    const voiceText = data.voice_text||'';
+    hist.push({role:'silas',content:reply,ts:rts,thinking,voiceText});
+    addBubble('silas',reply,rts,thinking,voiceText);
     saveHist();
   } catch {
     ldr.remove();
@@ -436,18 +454,28 @@ document.getElementById('inp').addEventListener('keydown', function(e){
 });
 
 // TTS
-async function playTTS(text, btnId) {
-  const btn = document.getElementById(btnId);
-  if (btn) btn.textContent = '⏳';
+async function playTTS(text, barId) {
+  const bar = document.getElementById(barId);
+  if (!bar || bar.classList.contains('playing')) return;
+  const icon = bar.querySelector('.voice-icon');
+  if (icon) icon.textContent = '⏳';
   try {
     const r = await fetch(`${API}/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
     const blob = await r.blob();
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
+    bar.classList.add('playing');
+    if (icon) icon.textContent = '🔊';
     await audio.play();
-    if (btn) btn.textContent = '▶ 播放中';
-    audio.onended = () => { if(btn) btn.textContent='🔊 重播'; URL.revokeObjectURL(url); };
-  } catch { if(btn) btn.textContent='🔊 重试'; }
+    audio.onended = () => {
+      bar.classList.remove('playing');
+      if (icon) icon.textContent = '🔈';
+      URL.revokeObjectURL(url);
+    };
+  } catch {
+    bar.classList.remove('playing');
+    if (icon) icon.textContent = '❌';
+  }
 }
 
 // MEMORY
