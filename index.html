@@ -81,9 +81,9 @@
     .mg{display:flex;flex-direction:column;gap:3px}
     .mg.user{align-items:flex-end}
     .mg.silas{align-items:flex-start}
-    .bubble{max-width:80%;padding:9px 13px;border-radius:17px;line-height:1.55;font-size:14px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);word-break:break-word}
-    .mg.user .bubble{background:var(--user-bg);border:1px solid var(--border);border-radius:17px 17px 4px 17px}
-    .mg.silas .bubble{background:var(--silas-bg);border:1px solid var(--border);border-radius:17px 17px 17px 4px;box-shadow:0 2px 8px var(--shadow)}
+    .bubble{max-width:80%;padding:10px 14px;border-radius:18px;line-height:1.6;font-size:14px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);word-break:break-word}
+    .mg.user .bubble{background:var(--user-bg);border:1px solid var(--border);border-radius:18px 18px 4px 18px;box-shadow:0 1px 4px var(--shadow)}
+    .mg.silas .bubble{background:var(--silas-bg);border:1px solid var(--border);border-radius:18px 18px 18px 4px;box-shadow:0 3px 12px var(--shadow)}
     .msg-meta{display:flex;align-items:center;gap:7px;padding:0 3px}
     .ts{font-size:10px;color:var(--text3)}
     .voice-bar{display:flex;align-items:center;gap:8px;background:var(--silas-bg);border:1px solid var(--border);border-radius:17px 17px 17px 4px;padding:8px 14px;cursor:pointer;max-width:150px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 2px 8px var(--shadow);transition:opacity .2s;margin-top:2px}
@@ -125,7 +125,8 @@
     .ptitle{font-family:'Playfair Display',serif;font-size:17px;color:var(--text);margin-bottom:14px}
     .tl{position:relative;padding-left:18px}
     .tl::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:1px;background:var(--border)}
-    .tli{position:relative;margin-bottom:14px;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:11px 13px;backdrop-filter:blur(12px)}
+    .tli{position:relative;margin-bottom:14px;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:12px 14px;backdrop-filter:blur(16px);box-shadow:0 2px 10px var(--shadow);transition:transform .15s}
+    .tli:active{transform:scale(.99)}
     .tli::before{content:'';position:absolute;left:-15px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--accent);border:2px solid var(--bg)}
     .tli-content{font-size:13px;line-height:1.55;color:var(--text)}
     .tli-bar{height:3px;border-radius:2px;background:var(--accent);margin-top:7px;opacity:.7}
@@ -140,7 +141,8 @@
     .diary-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
     .nbtn{background:var(--accent);color:#fff;border:none;border-radius:11px;padding:6px 13px;font-size:12px;cursor:pointer;font-family:'Noto Serif SC',serif}
     .dgrid{display:flex;flex-direction:column;gap:9px}
-    .dcard{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:12px 14px;cursor:pointer;backdrop-filter:blur(12px);transition:transform .15s}
+    .dcard{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:13px 15px;cursor:pointer;backdrop-filter:blur(16px);transition:transform .18s,box-shadow .18s;box-shadow:0 2px 10px var(--shadow)}
+    .dcard:hover{transform:translateY(-1px);box-shadow:0 5px 18px var(--shadow)}
     .dcard:active{transform:scale(.98)}
     .dc-date{font-size:10px;color:var(--text3);margin-bottom:5px}
     .dc-title{font-size:14px;color:var(--text);margin-bottom:5px;font-weight:500}
@@ -204,7 +206,10 @@
     <div id="page-diary" class="page">
       <div class="diary-hdr">
         <div class="ptitle">Silas 的日记</div>
-        <button class="nbtn" onclick="openEdit()">+ 新建</button>
+        <div style="display:flex;gap:7px">
+          <button class="rbtn" id="genDiaryBtn" onclick="generateDiary()" style="margin:0">✦ 让Silas写</button>
+          <button class="nbtn" onclick="openEdit()">+ 新建</button>
+        </div>
       </div>
       <div class="dgrid" id="dgrid"></div>
     </div>
@@ -515,7 +520,35 @@ async function loadMems() {
   } catch { c.innerHTML='<div class="mem-empty">记忆加载失败，稍后重试</div>'; }
 }
 
-// DIARY
+// DIARY - Silas generate
+async function generateDiary() {
+  const btn = document.getElementById('genDiaryBtn');
+  if (!btn || btn.disabled) return;
+  btn.disabled = true;
+  btn.textContent = '✦ 写中…';
+  try {
+    const recent = hist.slice(-20).map(h => `${h.role==='user'?'Jasmine':'Silas'}: ${h.content}`);
+    const r = await fetch(`${API}/diary/generate`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({recent})
+    });
+    const data = await r.json();
+    if (!data.diary) throw new Error('empty');
+    const today = new Date().toLocaleDateString('zh-CN',{year:'numeric',month:'2-digit',day:'2-digit'});
+    const entry = {id: Date.now(), title: today + ' · Silas', content: data.diary, date: today, ts: Date.now()};
+    diaries.unshift(entry);
+    saveDiaries();
+    renderDiary();
+    btn.textContent = '✦ 已写好';
+    setTimeout(() => { btn.disabled=false; btn.textContent='✦ 让Silas写'; }, 3000);
+  } catch {
+    btn.disabled = false;
+    btn.textContent = '✦ 写失败了';
+    setTimeout(() => { btn.textContent='✦ 让Silas写'; }, 2000);
+  }
+}
+
 let diaries = [], editId = null;
 function loadDiaries() { try{diaries=JSON.parse(localStorage.getItem(SK_DIARY)||'[]');}catch{diaries=[];} }
 function saveDiaries() { localStorage.setItem(SK_DIARY,JSON.stringify(diaries)); }
