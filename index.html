@@ -84,8 +84,9 @@
     .mg{display:flex;flex-direction:column;gap:3px}
     .mg.user{align-items:flex-end}
     .mg.silas{align-items:flex-start}
-    .mg-row{display:flex;align-items:flex-end;gap:6px}
+    .mg-row{display:flex;align-items:flex-end;gap:6px;max-width:100%}
     .mg.user .mg-row{flex-direction:row-reverse}
+    .mg-row>div:last-child{min-width:0;max-width:calc(100% - 30px)}
     .bav{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'Playfair Display',serif;font-weight:bold;border:1px solid var(--border)}
     .bav.s{background:var(--silas-bg);color:var(--accent)}
     .bav.u{background:var(--user-bg);color:var(--text2)}
@@ -502,36 +503,26 @@ document.getElementById('inp').addEventListener('keydown', function(e){
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}
 });
 
-// TTS — audio element created before async to preserve user-gesture context
+// TTS
 async function playTTS(text, barId) {
   const bar = document.getElementById(barId);
   if (!bar || bar.classList.contains('playing')) return;
   const icon = bar.querySelector('.voice-icon');
-  const audio = new Audio(); // must be synchronous with click
   if (icon) icon.textContent = '⏳';
   bar.classList.add('playing');
   try {
     const r = await fetch(`${API}/tts`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
     if (!r.ok) throw new Error('tts '+r.status);
-    const blob = await r.blob();
-    const url = URL.createObjectURL(blob);
-    audio.src = url;
+    const data = await r.json();
+    const audio = new Audio(data.audio);
     if (icon) icon.textContent = '🔊';
-    audio.onended = () => {
-      bar.classList.remove('playing');
-      if (icon) icon.textContent = '🔈';
-      URL.revokeObjectURL(url);
-    };
-    audio.onerror = () => {
-      bar.classList.remove('playing');
-      if (icon) icon.textContent = '❌';
-      URL.revokeObjectURL(url);
-    };
-    await audio.play();
+    audio.onended = () => { bar.classList.remove('playing'); if(icon) icon.textContent='🔈'; };
+    audio.onerror = () => { bar.classList.remove('playing'); if(icon) icon.textContent='❌'; };
+    audio.play().catch(()=>{ bar.classList.remove('playing'); if(icon) icon.textContent='❌'; });
   } catch(e) {
     bar.classList.remove('playing');
     if (icon) icon.textContent = '❌';
-    console.error('TTS error:', e);
+    console.error('TTS:', e);
   }
 }
 
