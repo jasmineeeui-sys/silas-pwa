@@ -467,22 +467,18 @@ async function playTTS(text, barId) {
     const blob = await r.blob();
     const url = URL.createObjectURL(blob);
     const audio = new Audio(url);
-    audio.oncanplaythrough = () => {
-      bar.classList.add('playing');
-      if (icon) icon.textContent = '🔊';
-      audio.play().catch(()=>{ bar.classList.remove('playing'); if(icon) icon.textContent='❌'; });
-    };
+    bar.classList.add('playing');
+    if (icon) icon.textContent = '🔊';
     audio.onended = () => {
       bar.classList.remove('playing');
       if (icon) icon.textContent = '🔈';
       URL.revokeObjectURL(url);
     };
-    audio.onerror = () => {
+    audio.play().catch(() => {
       bar.classList.remove('playing');
       if (icon) icon.textContent = '❌';
       URL.revokeObjectURL(url);
-    };
-    audio.load();
+    });
   } catch {
     bar.classList.remove('playing');
     if (icon) icon.textContent = '❌';
